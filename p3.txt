@@ -1,0 +1,47 @@
+.TH P3 "File Systems"
+
+.SH NAME
+.P
+P3 - File Systems
+
+.SH SYNOPSIS:
+.P
+There were a few main objectives for this project. The first was to develop a library to read/interpret a WAD file and create a directory/file structure from it. The second objective was to implement a user space daemon (via FUSE) to access the file system structure once mounted. The final objective was to test this implementation by navigating the mounted directory and examining the names and file contents.
+
+.SH DESCRIPTION
+.P
+
+From libWad/Wad.h :
+
+.RS
+I first created a header file which included the Wad class. The first section of the Wad class was a treeNode struct which was used to represent the interpreted files/directories as nodes of an n-ary tree data structure. The next section included declarations of the required library functions as well as helper functions.
+.RE
+
+From libWad/Wad.cpp :
+
+.RS
+Within the Wad.cpp file, the Wad class member functions are defined. The WAD file elements are represented as a directory structure in memory. The rootNode of the tree represents the root directory of the WAD file. Each directory in the file is represented by a treeNode object with the name of the directory, a pointer to its parent directory, and a vector of its child nodes (files or directories). Each file in the WAD file is represented by a treeNode object with the name of the file, the offset of the file's data in the binary WAD file, and the length of the file's data. When the WAD file is loaded, the contents of each file node in the tree are read from the binary WAD file and stored in the "contents" member variable of the treeNode object.
+.RE
+
+From wadfs/wadfs.cpp :
+
+.RS
+This program implements a FUSE daemon that allows accessing the contents of a WAD file as if it were a regular file system. It loads the WAD file specified in the command line argument, sets up the fuse_operations structure that defines the operations to perform on the file system, and implements each operation as a separate function. The do_getattr() function returns the attributes of a file or directory, do_open() returns 0 to indicate successful file opening, and do_read() reads the contents of a file from the WAD file. Finally, the program calls fuse_main() to start the daemon, and do_destroy() function is called to clean up any resources used by the daemon.
+.RE
+ 
+.SH TESTING
+.P
+To test wad.cpp/wad.h I initially unzipped the archive, changed into the libWad directory, and ran "make" to see that libWad.a was created. I then created a test program to check that the library accurately interpreted the wad file and resembled the sample dump txt files. I ran into trouble using the suggested line of code from the assignment file, but I was able to get "test" to compile by running the following similar command: 	c++ -o test wad_dump.cpp -I libWad -L ./libWad -l:libWad.a
+After this the sample wad files were tested using the command: 	./test sample1.wad
+To run the daemon, an empty "mount" directory was createed, and then the following command was entered: 	./wadfs/wadfs sample1.wad ./mount
+Following this command, by changing into the mount directory the new file system contents were checked using the ls and cat commands.
+
+.SH REFERENCES
+.P
+https://ufl.instructure.com/files/77596827/download?download_frd=1
+
+.SH SCREENCAST
+https://www.youtube.com/watch?v=TwxR9fe6tIU
+
+.SH AUTHOR
+Michael Gerber
